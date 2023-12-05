@@ -1,0 +1,53 @@
+﻿@page "/game"
+
+<PageTitle>Game</PageTitle>
+
+<h1>Game</h1>
+
+<div class="container">
+    <div class="row line-bottom">
+        <div class="col line-right">
+            <button class="btn-tictac">X</button>
+        </div>
+        <div class="col line-right">
+            <button class="btn-tictac">O</button>
+        </div>
+        <div class="col">
+            <button class="btn-tictac">X</button>
+        </div>
+    </div>
+    <div class="row line-bottom">
+        <div class="col line-right">
+            <button class="btn-tictac">O</button>
+        </div>
+        <div class="col line-right">
+            <button class="btn-tictac">X</button>
+        </div>
+        <div class="col">
+            <button class="btn-tictac">X</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col line-right">
+            <button class="btn-tictac">X</button>
+        </div>
+        <div class="col line-right">
+            <button class="btn-tictac">X</button>
+        </div>
+        <div class="col">
+            <button class="btn-tictac">O</button>
+        </div>
+    </div>
+</div>
+@* <p role="status">Current count: @currentCount</p>
+ *@
+@* <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+ *@
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+    }
+}
