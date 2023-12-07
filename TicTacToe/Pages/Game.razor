@@ -1,55 +1,156 @@
-﻿@page "/game"
+﻿@page "/game/{PlayerVsAi}"
+@using TicTacToe.Services;
 
 <PageTitle>Game</PageTitle>
 
 <h1>Game</h1>
 
+<p>Current player: @gameService.GetCurrentPlayer()</p>
+
 <div class="container">
     <div class="row p-100">
-        <div class="row line-bottom text-center">
-            <div class="col-4  line-right d-flex justify-content-center ">
-                <button class="btn-tictac">X</button>
+        @for (int i = 0; i < 3; i++)
+        {
+            <div class="row @(i < 2 ? "line-bottom" : "") text-center">
+                @for (int j = 0; j < 3; j++)
+                {
+                    int row = i;
+                    int col = j;
+                    <div class="col-4 @(col < 2 ? "line-right" : "")">
+                        <button class="btn-tictac" @onclick="() => MakeMove(row, col)" disabled="@IsGameEnded()">
+                            <img src="@GetCellImage(row, col)" alt="Cell Image" />
+                        </button>
+                    </div>
+                }
             </div>
-            <div class="col-4  line-right">
-                <button class="btn-tictac">O</button>
-            </div>
-            <div class="col-4 ">
-                <button class="btn-tictac">X</button>
-            </div>
-        </div>
-        <div class="row line-bottom text-center">
-            <div class="col-4  line-right">
-                <button class="btn-tictac">O</button>
-            </div>
-            <div class="col-4  line-right">
-                <button class="btn-tictac">X</button>
-            </div>
-            <div class="col-4 ">
-                <button class="btn-tictac">X</button>
-            </div>
-        </div>
-        <div class="row text-center">
-            <div class="col-4  line-right">
-                <button class="btn-tictac">X</button>
-            </div>
-            <div class="col-4  line-right">
-                <button class="btn-tictac">X</button>
-            </div>
-            <div class="col-4 ">
-                <button class="btn-tictac">O</button>
+        }
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(gameStatusMessage))
+{
+    <div class="modal fade show" style="display: block;" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Game Status</h5>
+                </div>
+                <div class="modal-body">
+                    @if (gameStatusMessage.Contains("Player X wins!") || gameStatusMessage.Contains("Player O wins!"))
+                    {
+                        <p>@gameStatusMessage</p>
+                        <img src="@GetRandomWinGifPath()" alt="Player Wins!" style="width: 100%;" />
+                    }
+                    else
+                    {
+                        <p>@gameStatusMessage</p>
+                    }
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" @onclick="CloseModal">Reset game</button>
+                </div>
             </div>
         </div>
     </div>
-</div>
-@* <p role="status">Current count: @currentCount</p>
- *@
-@* <button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
- *@
-@code {
-    private int currentCount = 0;
+}
 
-    private void IncrementCount()
+@code {
+    [Parameter]
+    public string PlayerVsAi { get; set; }
+
+    private bool IsPlayerVsAi => bool.Parse(PlayerVsAi);
+
+    private GameService gameService = new GameService();
+    private AIPlayerService aIPlayerService = new AIPlayerService('0');
+    private string gameStatusMessage = "";
+    private bool showGameStatus = false;
+
+    private void MakeMove(int row, int col)
     {
-        currentCount++;
+        bool moveMade = gameService.MakeMove(row, col);
+        if (moveMade)
+        {
+            StateHasChanged();
+            if (IsPlayerVsAi && gameService.GetCurrentPlayer() == 'O')
+            {
+                MakeAiMove();
+            }
+
+            CheckGameStatus();
+        }
+    }
+
+    private void MakeAiMove()
+    {
+        var aiMove = aIPlayerService.MakeMove(gameService.GetBoardState());
+        gameService.MakeMove(aiMove.Item1, aiMove.Item2);
+        StateHasChanged();
+    }
+
+    private void CheckGameStatus()
+    {
+        GameStatus status = gameService.CheckGameStatus();
+
+        switch (status)
+        {
+            case GameStatus.InProgress:
+                break;
+            case GameStatus.PlayerXWins:
+                gameStatusMessage = "Player X wins!";
+                break;
+            case GameStatus.PlayerOWins:
+                gameStatusMessage = "Player O wins!";
+                break;
+            case GameStatus.Draw:
+                gameStatusMessage = "It's a draw!";
+                break;
+            default:
+                break;
+        }
+    }
+
+    private void CloseModal(MouseEventArgs e)
+    {
+        gameStatusMessage = "";
+        ResetGame();
+    }
+
+    private string GetCellValue(int row, int col)
+    {
+        return gameService.GetBoardState()[row, col].ToString();
+    }
+
+    private string GetRandomWinGifPath()
+    {
+        Random rand = new Random();
+        int randomNum = rand.Next(1, 11);
+        return $"/gif/win{randomNum}.gif";
+    }
+
+    private bool IsGameEnded()
+    {
+        return !string.IsNullOrEmpty(gameStatusMessage);
+    }
+
+    private void ResetGame()
+    {
+        gameService.ResetGame();
+    }
+
+    private string GetCellImage(int row, int col)
+    {
+        string cellValue = GetCellValue(row, col);
+        if (cellValue == "X")
+        {
+            return "/img/x.png";
+        }
+        else if (cellValue == "O")
+        {
+            return "/img/o.png";
+        }
+        else
+        {
+            return "/img/empty.png";
+        }
     }
 }

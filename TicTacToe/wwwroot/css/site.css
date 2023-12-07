@@ -69,15 +69,22 @@ a, .btn-link {
 
 .btn-tictac {
     margin: 25px;
-    background: lightyellow;
-    width: 250px;
-    height: 250px;
+    background: white;
+    width: 200px;
+    height: 200px;
+    padding: 0;
+    position: relative; 
+    border: none;
 }
 
-.line-bottom {
-    border-bottom: 2px solid #333;
+    .btn-tictac img {
+        width: 99%;
 }
 
 .line-right {
     border-right: 2px solid #333;
+}
+
+.line-bottom {
+    border-bottom: 2px solid #333;
 }
